@@ -8,6 +8,6 @@ namespace BubberDinner.Tests
         public void Test1()
         {
 
-        }
+        } 
     }
 }
