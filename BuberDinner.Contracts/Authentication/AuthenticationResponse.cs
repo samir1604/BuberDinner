@@ -6,12 +6,10 @@ using System.Threading.Tasks;
 
 namespace BuberDinner.Contracts.Authentication
 {
-    public record AuthenticationResponse
-    {
-        public Guid Id;
-        public string FirstName;
-        public string LastName;
-        public string Email;
-        public string Token;
-    }
+    public record AuthenticationResponse(    
+        Guid Id, 
+        string FirstName,
+        string LastName,
+         string Email,
+        string Token);
 }

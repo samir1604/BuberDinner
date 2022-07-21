@@ -1,4 +1,5 @@
 ﻿using BubberDinner.Domain.Entities;
+using BuberDinner.Application.Common.Errors;
 using BuberDinner.Application.Common.Interfaces.Authentication;
 using BuberDinner.Application.Common.Interfaces.Persistence;
 using System;
@@ -26,13 +27,13 @@ namespace BuberDinner.Application.Services.Authentication
             //Validate user Exists
             if (_userRepository.GetUserByEmail(email) is not User user)
             {
-                throw new InvalidOperationException("User with given email does not exists");
+                throw new Exception("User with given email does not exists");
             }
 
             //Validate Password
             if(user.Password != password)
             {
-                throw new InvalidOperationException("Invalid Password");
+                throw new Exception("Invalid Password");
             }
 
             //Create Jwt
@@ -46,7 +47,7 @@ namespace BuberDinner.Application.Services.Authentication
             // Check if user already exists
             if (_userRepository.GetUserByEmail(email) is not null)
             {
-                throw new InvalidOperationException("User exists");
+                throw new DuplicateEmailException("User exists");
             }
 
             // Create user (Generate Unique ID)

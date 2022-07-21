@@ -11,7 +11,8 @@ namespace BuberDinner.WebApi.Filters
             var exception = context.Exception;
 
             var problemDetails = new ProblemDetails
-            {
+            { 
+                Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
                 Instance = context.HttpContext.Request.Path,
                 Status = (int)HttpStatusCode.InternalServerError,
                 Detail = exception.Message,

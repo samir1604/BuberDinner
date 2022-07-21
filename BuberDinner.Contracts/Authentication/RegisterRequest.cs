@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace BuberDinner.Contracts.Authentication
 {
-    public record RegisterRequest
-    {
-        public string FirstName;
-        public string LastName;
-        public string Email;
-        public string Password;
-    }
+    public record RegisterRequest(    
+        string FirstName,
+        string LastName,
+        string Email,
+        string Password);
 }
