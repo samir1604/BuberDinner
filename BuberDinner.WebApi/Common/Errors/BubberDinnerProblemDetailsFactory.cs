@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
 using System.Diagnostics;
 
-namespace BuberDinner.WebApi.Errors
+namespace BuberDinner.WebApi.Common.Errors
 {
     public class BubberDinnerProblemDetailsFactory : ProblemDetailsFactory
     {
@@ -69,7 +69,7 @@ namespace BuberDinner.WebApi.Errors
 
             if (traceId != null)
             {
-                problemDetails.Extensions["traceId"] = traceId;
+                problemDetails.Extensions["traceId"] = traceId;                
             }
 
             problemDetails.Extensions.Add("customProperty","customValue");

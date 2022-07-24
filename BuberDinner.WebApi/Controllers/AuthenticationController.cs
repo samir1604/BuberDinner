@@ -22,6 +22,7 @@ namespace BuberDinner.WebApi.Controllers
         }
 
         [HttpPost("register")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AuthenticationResponse))]
         public ActionResult<AuthenticationResponse> Register(RegisterRequest request)
         {
             var authResult = _authenticationService.Register(
@@ -39,6 +40,7 @@ namespace BuberDinner.WebApi.Controllers
         }
 
         [HttpPost("login")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AuthenticationResponse))]
         public ActionResult<AuthenticationResponse> Login(LoginRequest request)
         {
             var authResult = _authenticationService.Login(request.Email, request.Password);
