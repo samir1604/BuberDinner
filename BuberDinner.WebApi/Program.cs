@@ -1,8 +1,6 @@
 using BuberDinner.Application;
 using BuberDinner.Infrastructure;
-using BuberDinner.WebApi.Errors;
-using BuberDinner.WebApi.Filters;
-using BuberDinner.WebApi.Middleware;
+using BuberDinner.WebApi.Common.Errors;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);

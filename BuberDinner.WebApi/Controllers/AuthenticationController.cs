@@ -1,5 +1,6 @@
 ﻿using BuberDinner.Application.Services.Authentication;
 using BuberDinner.Contracts.Authentication;
+using ErrorOr;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,7 +8,7 @@ namespace BuberDinner.WebApi.Controllers
 {
     [Route("api/auth")]
     [ApiController]
-    public class AuthenticationController : ControllerBase
+    public class AuthenticationController : BaseController
     {
         private readonly IAuthenticationService _authenticationService;
         public AuthenticationController(IAuthenticationService authenticationService)
@@ -22,37 +23,44 @@ namespace BuberDinner.WebApi.Controllers
         }
 
         [HttpPost("register")]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AuthenticationResponse))]
-        public ActionResult<AuthenticationResponse> Register(RegisterRequest request)
+        public IActionResult Register(RegisterRequest request)
         {
-            var authResult = _authenticationService.Register(
+            ErrorOr<AuthenticationResult> authResult = _authenticationService.Register(
                 request.FirstName, request.LastName, request.Email, request.Password);
 
-            var response = new AuthenticationResponse(
-                authResult.User.Id,
-                authResult.User.FirstName,
-                authResult.User.LastName,
-                authResult.User.Email,
-                authResult.Token);
-            
-
-            return Ok(response);
-        }
+            return authResult.Match(
+                authResult => Ok(MapAuthResult(authResult)),
+                errors => Problem(errors));            
+        }        
 
         [HttpPost("login")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AuthenticationResponse))]
-        public ActionResult<AuthenticationResponse> Login(LoginRequest request)
+        public IActionResult Login(LoginRequest request)
         {
-            var authResult = _authenticationService.Login(request.Email, request.Password);
+            ErrorOr<AuthenticationResult> authResult = _authenticationService.Login(request.Email, request.Password);
+            
+            if (authResult.IsError && authResult.FirstError == BubberDinner.Domain.Common.Errors.Errors.Authentication.InvalidCredential)
+            {
+                return Problem(statusCode: StatusCodes.Status401Unauthorized, title: authResult.FirstError.Description);
+            }
 
-            var response = new AuthenticationResponse(
-                authResult.User.Id,
-                authResult.User.FirstName,
-                authResult.User.LastName,
-                authResult.User.Email,
-                authResult.Token);
+            return authResult.Match(
+                authResult => Ok(MapAuthResult(authResult)),
+                errors => Problem(errors));
+        }
 
-            return Ok(response);
+        private static AuthenticationResponse MapAuthResult(AuthenticationResult authResult)
+        {
+            return new AuthenticationResponse(
+                            authResult.User.Id,
+                            authResult.User.FirstName,
+                            authResult.User.LastName,
+                            authResult.User.Email,
+                            authResult.Token);
         }
     }
 }
