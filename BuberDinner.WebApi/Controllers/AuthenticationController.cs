@@ -1,6 +1,11 @@
-﻿using BuberDinner.Application.Services.Authentication;
+﻿using BuberDinner.Application.Services.Authentication.Commands;
+using BuberDinner.Application.Services.Authentication.Commands.Register;
+using BuberDinner.Application.Services.Authentication.Common;
+using BuberDinner.Application.Services.Authentication.Queries;
+using BuberDinner.Application.Services.Authentication.Queries.Login;
 using BuberDinner.Contracts.Authentication;
 using ErrorOr;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,10 +15,11 @@ namespace BuberDinner.WebApi.Controllers
     [ApiController]
     public class AuthenticationController : BaseController
     {
-        private readonly IAuthenticationService _authenticationService;
-        public AuthenticationController(IAuthenticationService authenticationService)
+        private readonly ISender _mediator;       
+
+        public AuthenticationController(ISender mediator)
         {
-            _authenticationService = authenticationService;
+            _mediator = mediator;
         }
 
         [HttpGet("throw")]
@@ -25,10 +31,11 @@ namespace BuberDinner.WebApi.Controllers
         [HttpPost("register")]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AuthenticationResponse))]
-        public IActionResult Register(RegisterRequest request)
+        public async Task<IActionResult> Register(RegisterRequest request)
         {
-            ErrorOr<AuthenticationResult> authResult = _authenticationService.Register(
-                request.FirstName, request.LastName, request.Email, request.Password);
+            var command = new RegisterCommand(request.FirstName, request.LastName, request.Email, request.Password);
+            ErrorOr<AuthenticationResult> authResult = await _mediator.Send(command);
+                       
 
             return authResult.Match(
                 authResult => Ok(MapAuthResult(authResult)),
@@ -39,9 +46,10 @@ namespace BuberDinner.WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AuthenticationResponse))]
-        public IActionResult Login(LoginRequest request)
+        public async Task<IActionResult> Login(LoginRequest request)
         {
-            ErrorOr<AuthenticationResult> authResult = _authenticationService.Login(request.Email, request.Password);
+            var query = new LoginQuery(request.Email, request.Password);
+            ErrorOr<AuthenticationResult> authResult = await _mediator.Send(query);
             
             if (authResult.IsError && authResult.FirstError == BubberDinner.Domain.Common.Errors.Errors.Authentication.InvalidCredential)
             {
